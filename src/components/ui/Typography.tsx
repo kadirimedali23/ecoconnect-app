@@ -14,7 +14,7 @@ interface HeadingProps extends TypographyProps {
 export const Heading: React.FC<HeadingProps> = ({ level = 1, children, className = "" }) => {
   const styles: Record<HeadingLevel, string> = {
     1: "text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900",
-    2: "text-3xl font-bold text-slate-800",
+    2: "text-3xl font-bold text-slate-500",
     3: "text-xl font-semibold text-slate-700",
   };
   
