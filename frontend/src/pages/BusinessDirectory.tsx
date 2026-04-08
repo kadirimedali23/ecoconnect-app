@@ -1,7 +1,11 @@
+import { useCallback, useMemo, useState } from "react";
+import { useFetch } from "../hooks/useFetch.ts";
+import { getBusinesses, type Business } from "../services/api";
 import BusinessCard from "../components/BusinessCard";
 import { Container } from "../components/ui/Layout";
-import type { Business } from "../services/api";
 
+type Category = Business["category"] | "all";
+type SortKey = "name-asc" | "name-desc" | "rating-desc" | "newest";
 
 function SkeletonCard() {
   return (
@@ -20,11 +24,46 @@ function SkeletonCard() {
 }
 
 export default function BusinessDirectory() {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<Category>("all");
+  const [sort, setSort] = useState<SortKey>("name-asc");
 
-  const loading = false;
+  const fetcher = useCallback(() => getBusinesses(), []);
+  const { data: businesses, loading, error } = useFetch<Business[]>(fetcher);
 
-  const businesses: Business[] = [];
+  const filteredAndSorted = useMemo<Business[]>(() => {
+    if (!businesses) return [];
 
+    const needle = query.toLowerCase().trim();
+
+    const searched = needle
+      ? businesses.filter(
+          (b) =>
+            b.name.toLowerCase().includes(needle) ||
+            b.description.toLowerCase().includes(needle),
+        )
+      : businesses;
+
+    const filtered =
+      category === "all"
+        ? searched
+        : searched.filter((b) => b.category === category);
+
+    return filtered.slice().sort((a, b) => {
+      switch (sort) {
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "rating-desc":
+          return b.averageRating - a.averageRating;
+        case "newest":
+          return b.createdAt.localeCompare(a.createdAt);
+        default:
+          return 0;
+      }
+    });
+  }, [businesses, query, category, sort]);
 
   return (
     <Container className="py-8 max-w-6xl">
@@ -39,13 +78,15 @@ export default function BusinessDirectory() {
         <input
           type="search"
           placeholder="Search businesses..."
-          value=""
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
           className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
           aria-label="Search businesses"
         />
 
         <select
-          value="all"
+          value={category}
+          onChange={(e) => setCategory(e.target.value as Category)}
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 bg-white"
           aria-label="Filter by category"
         >
@@ -57,7 +98,8 @@ export default function BusinessDirectory() {
         </select>
 
         <select
-          value="name-asc"
+          value={sort}
+          onChange={(e) => setSort(e.target.value as SortKey)}
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 bg-white"
           aria-label="Sort businesses"
         >
@@ -68,14 +110,41 @@ export default function BusinessDirectory() {
         </select>
       </div>
 
+      {!loading && !error && (
+        <p className="mb-4 text-sm text-gray-500">
+          {filteredAndSorted.length === 0
+            ? "No businesses match your search."
+            : `Showing ${filteredAndSorted.length} business${filteredAndSorted.length === 1 ? "" : "es"}`}
+        </p>
+      )}
+
+      {error && (
+        <div
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
+          <strong>Failed to load businesses.</strong> {error}
+          <br />
+          Please try refreshing the page or check back later.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {loading
           ? Array.from({ length: 6 }, (_, i) => <SkeletonCard key={i} />)
-          : businesses.map((business) => (
+          : filteredAndSorted.map((business) => (
               <BusinessCard key={business.id} business={business} />
             ))}
       </div>
 
+      {!loading && !error && filteredAndSorted.length === 0 && (
+        <div className="mt-12 text-center text-gray-400">
+          <p className="text-4xl">🌱</p>
+          <p className="mt-2 text-sm">
+            No results found. Try adjusting your search or filters.
+          </p>
+        </div>
+      )}
     </Container>
   );
 }

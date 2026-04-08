@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import type { Business } from '../services/api.ts';
+import type { Business } from '../services/api';
 
 
 const CATEGORY_STYLES: Record<Business['category'], string> = {
@@ -15,6 +15,7 @@ const CATEGORY_LABELS: Record<Business['category'], string> = {
   'food-producer': 'Food Producer',
   'eco-services':  'Eco Services',
 };
+
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -32,6 +33,7 @@ function StarRating({ rating }: { rating: number }) {
     </div>
   );
 }
+
 
 
 interface BusinessCardProps {
