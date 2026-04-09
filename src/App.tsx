@@ -6,6 +6,7 @@ import './App.css';
 import BusinessDirectory from './pages/BusinessDirectory.tsx';
 import Register from './pages/Register.tsx';
 import { AuthProvider } from './context/AuthProvider.tsx';
+import Login from './pages/Login.tsx';
 
 export default function App() {
   return (
@@ -17,7 +18,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/directory" element={<BusinessDirectory />} />
           <Route path="/directory/:id" element={<></>} />
-          <Route path="/login" element={<></>} />
+          <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>
       </main>
