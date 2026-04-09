@@ -1,9 +1,18 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Container } from './Layout';
 import { Button } from './Button';
+import { useAuth } from '../../hooks/useAuth';
 
 export const Navbar: React.FC = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
   return (
     <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-slate-100">
       <Container>
@@ -32,18 +41,30 @@ export const Navbar: React.FC = () => {
 
           {/* CTA Group */}
           <div className="flex items-center gap-6">
-            <Link
-              to="/login"
-              className="hidden sm:block text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors"
-              style={{ textDecoration: 'none' }}
-            >
-              Sign In
-            </Link>
-            <Link to="/register" style={{ textDecoration: 'none' }}>
-              <Button variant="success" className="!rounded-full !py-2 !px-6 text-sm">
-                Register
+            {user ? (
+              <Button
+                variant="success"
+                className="rounded-full! py-2! px-6! text-sm"
+                onClick={handleSignOut}
+              >
+                Logout
               </Button>
-            </Link>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="hidden sm:block text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors"
+                  style={{ textDecoration: 'none' }}
+                >
+                  Sign In
+                </Link>
+                <Link to="/register" style={{ textDecoration: 'none' }}>
+                  <Button variant="success" className="rounded-full! py-2! px-6! text-sm">
+                    Register
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </Container>

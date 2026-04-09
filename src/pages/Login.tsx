@@ -4,6 +4,7 @@ import { Heading, Text } from '../components/ui/Typography';
 import { Button } from '../components/ui/Button';
 import { useState, type FormEvent } from 'react';
 import { login } from '../services/authService';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
 
@@ -12,6 +13,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { refresh } = useAuth();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -19,6 +21,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login(email, password);
+      await refresh();
       navigate('/businesses');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Login failed');

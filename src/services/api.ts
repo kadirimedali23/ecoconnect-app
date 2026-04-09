@@ -1,3 +1,5 @@
+import { getIdToken } from './authService';
+
 const BASE_URL = import.meta.env.API_URL;
 
 export interface Business {
@@ -31,9 +33,13 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const idToken = await getIdToken();
+  const authHeader = idToken ? { Authorization: `Bearer ${idToken}` } : {};
+
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: {
       'Content-Type': 'application/json',
+      ...authHeader,
       ...options.headers,
     },
     ...options,

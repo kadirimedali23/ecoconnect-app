@@ -21,6 +21,7 @@ export default function Register() {
 
     if (password !== repeatPassword) {
       setError('Passwords do not match');
+      setLoading(false);
       return;
     }
     

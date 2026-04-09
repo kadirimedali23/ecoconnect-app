@@ -1,4 +1,4 @@
-import { signIn, signUp, signOut, getCurrentUser } from 'aws-amplify/auth';
+import { signIn, signUp, signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
 
 export interface AuthUser {
   username: string;
@@ -21,6 +21,15 @@ export async function register(email: string, password: string): Promise<void> {
 
 export async function logout(): Promise<void> {
   await signOut();
+}
+
+export async function getIdToken(): Promise<string | null> {
+  try {
+    const session = await fetchAuthSession();
+    return session.tokens?.idToken?.toString() ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function getCurrentAuthUser(): Promise<AuthUser | null> {
