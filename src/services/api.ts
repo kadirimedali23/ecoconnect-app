@@ -78,6 +78,25 @@ export async function getBusinesses(): Promise<Business[]> {
   return request<Business[]>('/businesses');
 }
 
+export async function getBusiness(id: string): Promise<Business> {
+  return request<Business>(`/businesses/${id}`);
+}
+
 export async function getCategories(): Promise<Category[]> {
   return request<Category[]>('/categories');
+}
+
+export async function getReviews(businessId: string): Promise<Review[]> {
+  return request<Review[]>(`/businesses/${businessId}/reviews`);
+}
+
+export async function postReview(payload: {
+  businessId: string;
+  rating: number;
+  comment: string;
+}): Promise<{ message: string; id: string }> {
+  return request(`/reviews`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
 }

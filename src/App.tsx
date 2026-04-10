@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthProvider.tsx';
 import Login from './pages/Login.tsx';
 import { useAuth } from './hooks/useAuth.ts';
 import BusinessDirectory from './pages/BusinessDirectory.tsx';
+import BusinessDetail from './pages/BusinessDetail.tsx';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/businesses" element={<BusinessDirectory />} />
+          <Route path="/businesses/:id" element={<BusinessDetail />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </main>
