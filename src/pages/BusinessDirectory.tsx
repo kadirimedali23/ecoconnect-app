@@ -1,10 +1,10 @@
-import { useCallback, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useFetch } from "../hooks/useFetch.ts";
-import { getBusinesses, type Business } from "../services/api";
+import { getBusinesses, getCategories, type Business, type Category } from "../services/api";
 import BusinessCard from "../components/BusinessCard";
 import { Container } from "../components/ui/Layout";
 
-type Category = Business["category"] | "all";
 type SortKey = "name-asc" | "name-desc" | "rating-desc" | "newest";
 
 function SkeletonCard() {
@@ -24,83 +24,121 @@ function SkeletonCard() {
 }
 
 export default function BusinessDirectory() {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<Category>("all");
-  const [sort, setSort] = useState<SortKey>("name-asc");
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const fetcher = useCallback(() => getBusinesses(), []);
-  const { data: businesses, loading, error } = useFetch<Business[]>(fetcher);
+  const [inputQ, setInputQ]       = useState(() => searchParams.get("q") ?? "");
+  const [city, setCity]           = useState(() => searchParams.get("city") ?? "");
+  const [categoryId, setCategoryId] = useState(() => searchParams.get("category") ?? "all");
+  const [sort, setSort]           = useState<SortKey>("name-asc");
 
-  const filteredAndSorted = useMemo<Business[]>(() => {
+  const [debouncedQ, setDebouncedQ]       = useState(inputQ);
+  const [debouncedCity, setDebouncedCity] = useState(city);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQ(inputQ), 400);
+    return () => clearTimeout(t);
+  }, [inputQ]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedCity(city), 400);
+    return () => clearTimeout(t);
+  }, [city]);
+
+  useEffect(() => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        debouncedQ ? next.set("q", debouncedQ) : next.delete("q");
+        categoryId !== "all" ? next.set("category", categoryId) : next.delete("category");
+        debouncedCity ? next.set("city", debouncedCity) : next.delete("city");
+        return next;
+      },
+      { replace: true },
+    );
+  }, [debouncedQ, categoryId, debouncedCity, setSearchParams]);
+
+  const { data: businesses, loading, error } = useFetch<Business[]>(getBusinesses);
+  const { data: categories } = useFetch<Category[]>(getCategories);
+
+  const filtered = useMemo<Business[]>(() => {
     if (!businesses) return [];
 
-    const needle = query.toLowerCase().trim();
+    const q    = debouncedQ.trim().toLowerCase();
+    const city = debouncedCity.trim().toLowerCase();
 
-    const searched = needle
-      ? businesses.filter(
-          (b) =>
-            b.name.toLowerCase().includes(needle) ||
-            b.description.toLowerCase().includes(needle),
-        )
-      : businesses;
+    return businesses.filter((b) => {
+      if (q && !b.name.toLowerCase().includes(q) && !b.description.toLowerCase().includes(q))
+        return false;
+      if (city && !b.city.toLowerCase().includes(city))
+        return false;
+      if (categoryId !== "all" && b.categoryId !== categoryId)
+        return false;
+      return true;
+    });
+  }, [businesses, debouncedQ, debouncedCity, categoryId]);
 
-    const filtered =
-      category === "all"
-        ? searched
-        : searched.filter((b) => b.category === category);
-
+  const sorted = useMemo<Business[]>(() => {
     return filtered.slice().sort((a, b) => {
       switch (sort) {
-        case "name-asc":
-          return a.name.localeCompare(b.name);
-        case "name-desc":
-          return b.name.localeCompare(a.name);
-        case "rating-desc":
-          return b.averageRating - a.averageRating;
-        case "newest":
-          return b.createdAt.localeCompare(a.createdAt);
-        default:
-          return 0;
+        case "name-asc":    return a.name.localeCompare(b.name);
+        case "name-desc":   return b.name.localeCompare(a.name);
+        case "rating-desc": return (b.rating ?? 0) - (a.rating ?? 0);
+        case "newest":      return b.createdAt.localeCompare(a.createdAt);
+        default:            return 0;
       }
     });
-  }, [businesses, query, category, sort]);
+  }, [filtered, sort]);
 
   return (
+    <div className="min-h-screen bg-emerald-900">
     <Container className="py-8 max-w-6xl">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Business Directory</h1>
-        <p className="mt-1 text-gray-500">
+        <h1 className="text-3xl font-bold text-white">Business Directory</h1>
+        <p className="mt-1 text-emerald-200">
           Discover eco-friendly businesses across Coventry and Warwickshire.
         </p>
       </div>
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+      {/* Filters */}
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+        {/* Search */}
         <input
-          type="search"
+          type="text"
           placeholder="Search businesses..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+          value={inputQ}
+          onChange={(e) => setInputQ(e.target.value)}
+          className="flex-1 min-w-48 rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
           aria-label="Search businesses"
         />
 
+        {/* City */}
+        <input
+          type="text"
+          placeholder="Filter by city..."
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          className="flex-1 min-w-36 rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+          aria-label="Filter by city"
+        />
+
+        {/* Category — populated from /categories API */}
         <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value as Category)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 bg-white"
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
+          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
           aria-label="Filter by category"
         >
           <option value="all">All Categories</option>
-          <option value="zero-waste">Zero Waste</option>
-          <option value="repair-cafe">Repair Café</option>
-          <option value="food-producer">Food Producer</option>
-          <option value="eco-services">Eco Services</option>
+          {(categories ?? []).map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
         </select>
 
+        {/* Sort */}
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortKey)}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 bg-white"
+          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
           aria-label="Sort businesses"
         >
           <option value="name-asc">A → Z</option>
@@ -110,14 +148,16 @@ export default function BusinessDirectory() {
         </select>
       </div>
 
+      {/* Result count */}
       {!loading && !error && (
-        <p className="mb-4 text-sm text-gray-500">
-          {filteredAndSorted.length === 0
+        <p className="mb-4 text-sm text-emerald-200">
+          {sorted.length === 0
             ? "No businesses match your search."
-            : `Showing ${filteredAndSorted.length} business${filteredAndSorted.length === 1 ? "" : "es"}`}
+            : `Showing ${sorted.length} business${sorted.length === 1 ? "" : "es"}`}
         </p>
       )}
 
+      {/* Error state */}
       {error && (
         <div
           role="alert"
@@ -129,16 +169,18 @@ export default function BusinessDirectory() {
         </div>
       )}
 
+      {/* Card grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {loading
           ? Array.from({ length: 6 }, (_, i) => <SkeletonCard key={i} />)
-          : filteredAndSorted.map((business) => (
+          : sorted.map((business) => (
               <BusinessCard key={business.id} business={business} />
             ))}
       </div>
 
-      {!loading && !error && filteredAndSorted.length === 0 && (
-        <div className="mt-12 text-center text-gray-400">
+      {/* Empty state */}
+      {!loading && !error && sorted.length === 0 && (
+        <div className="mt-12 text-center text-emerald-200">
           <p className="text-4xl">🌱</p>
           <p className="mt-2 text-sm">
             No results found. Try adjusting your search or filters.
@@ -146,5 +188,6 @@ export default function BusinessDirectory() {
         </div>
       )}
     </Container>
+    </div>
   );
 }

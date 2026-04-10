@@ -30,7 +30,7 @@ export default function Home() {
             </Text>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/directory">
+              <Link to="/businesses">
                 <Button
                   variant="success"
                   className="w-full sm:w-auto px-10 py-4 text-lg"

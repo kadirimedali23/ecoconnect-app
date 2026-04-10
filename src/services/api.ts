@@ -1,17 +1,24 @@
 import { getIdToken } from './authService';
 
-const BASE_URL = import.meta.env.API_URL;
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export interface Business {
   id: string;
   name: string;
-  category: 'zero-waste' | 'repair-cafe' | 'food-producer' | 'eco-services';
+  categoryId: string;
   description: string;
-  address: string;
+  street: string;
   city: string;
+  postcode: string;
+  country: string;
+  email: string;
+  phone: string;
   website: string;
   imageUrl: string;
-  averageRating: number;
+  rating?: number;
+  reviewCount?: number;
+  tags?: string[];
+  featured?: boolean;
   createdAt: string;
 }
 
@@ -34,13 +41,13 @@ export class ApiError extends Error {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const idToken = await getIdToken();
-  const authHeader = idToken ? { Authorization: `Bearer ${idToken}` } : {};
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (idToken) headers['Authorization'] = `Bearer ${idToken}`;
 
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: {
-      'Content-Type': 'application/json',
-      ...authHeader,
-      ...options.headers,
+      ...headers,
+      ...(options.headers as Record<string, string>),
     },
     ...options,
   });
@@ -62,17 +69,15 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export async function getBusinesses(filters?: {
-  category?: Business['category'];
-  city?: string;
-  q?: string;
-}): Promise<Business[]> {
-  const params = new URLSearchParams();
+export interface Category {
+  id: string;
+  name: string;
+}
 
-  if (filters?.category) params.set('category', filters.category);
-  if (filters?.city)     params.set('city', filters.city);
-  if (filters?.q)        params.set('q', filters.q);
+export async function getBusinesses(): Promise<Business[]> {
+  return request<Business[]>('/businesses');
+}
 
-  const query = params.toString();
-  return request<Business[]>(`/businesses${query ? `?${query}` : ''}`);
+export async function getCategories(): Promise<Category[]> {
+  return request<Category[]>('/categories');
 }
