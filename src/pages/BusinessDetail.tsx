@@ -259,32 +259,32 @@ export default function BusinessDetail() {
               )}
             </div>
 
-            {/* Reviews — only visible when logged in */}
-            {user && (
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Reviews{' '}
-                  {reviews && reviews.length > 0 && (
-                    <span className="text-gray-400 font-normal text-sm">({reviews.length})</span>
-                  )}
-                </h2>
+            {/* Reviews — list always visible; form only when logged in */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Reviews{' '}
+                {reviews && reviews.length > 0 && (
+                  <span className="text-gray-400 font-normal text-sm">({reviews.length})</span>
+                )}
+              </h2>
 
+              {revLoading ? (
+                <p className="text-sm text-gray-400 animate-pulse">Loading reviews…</p>
+              ) : reviews && reviews.length > 0 ? (
+                <div className="space-y-3">
+                  {reviews.map((r) => <ReviewCard key={r.id} review={r} />)}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400">No reviews yet. Be the first!</p>
+              )}
+
+              {user && (
                 <ReviewForm
                   businessId={business.id}
                   onSubmitted={() => setReviewTick((t) => t + 1)}
                 />
-
-                {revLoading ? (
-                  <p className="text-sm text-gray-400 animate-pulse">Loading reviews…</p>
-                ) : reviews && reviews.length > 0 ? (
-                  <div className="space-y-3">
-                    {reviews.map((r) => <ReviewCard key={r.id} review={r} />)}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-400">No reviews yet. Be the first!</p>
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </Container>
