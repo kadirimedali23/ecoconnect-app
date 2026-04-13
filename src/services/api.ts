@@ -135,3 +135,7 @@ export async function updateBusiness(id: string, payload: BusinessPayload): Prom
     body: JSON.stringify(payload),
   });
 }
+
+export async function deleteBusiness(id: string): Promise<{ message: string }> {
+  return request<{ message: string }>(`/businesses/${id}`, { method: 'DELETE' });
+}

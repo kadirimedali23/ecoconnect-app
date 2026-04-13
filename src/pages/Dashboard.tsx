@@ -9,6 +9,7 @@ import {
   getBusinesses,
   createBusiness,
   updateBusiness,
+  deleteBusiness,
   type Category,
   type Business,
   type BusinessPayload,
@@ -90,9 +91,13 @@ function BusinessesTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<BusinessPayload>(EMPTY_FORM);
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof BusinessPayload, string>>>({});
+  const [saveError, setSaveError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState('');
 
   const list = businesses ?? data ?? [];
+  const categoryMap = Object.fromEntries((categories ?? []).map((c) => [c.id, c.name]));
 
   function updateField(field: keyof BusinessPayload, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -102,6 +107,7 @@ function BusinessesTab() {
   function openAdd() {
     setForm(EMPTY_FORM);
     setFormErrors({});
+    setSaveError('');
     setEditingId(null);
     setAdding(true);
   }
@@ -122,6 +128,7 @@ function BusinessesTab() {
       tags: business.tags ?? [],
     });
     setFormErrors({});
+    setSaveError('');
     setAdding(false);
     setEditingId(business.id);
   }
@@ -130,16 +137,20 @@ function BusinessesTab() {
     setAdding(false);
     setEditingId(null);
     setFormErrors({});
+    setSaveError('');
   }
 
   async function handleAdd() {
     const errors = validateBusiness(form);
     if (Object.keys(errors).length > 0) { setFormErrors(errors); return; }
     setSaving(true);
+    setSaveError('');
     try {
       const created = await createBusiness(form);
       setBusinesses([...list, created]);
       cancelForm();
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Failed to save. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -149,12 +160,29 @@ function BusinessesTab() {
     const errors = validateBusiness(form);
     if (Object.keys(errors).length > 0) { setFormErrors(errors); return; }
     setSaving(true);
+    setSaveError('');
     try {
       const updated = await updateBusiness(id, form);
       setBusinesses(list.map((b) => (b.id === id ? updated : b)));
       cancelForm();
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Failed to save. Please try again.');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Are you sure you want to delete this business?')) return;
+    setDeletingId(id);
+    setDeleteError('');
+    try {
+      await deleteBusiness(id);
+      setBusinesses(list.filter((b) => b.id !== id));
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : 'Failed to delete. Please try again.');
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -187,15 +215,15 @@ function BusinessesTab() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {(
               [
-                { field: 'name',        label: 'Name *',        type: 'text' },
-                { field: 'city',        label: 'City *',        type: 'text' },
-                { field: 'street',      label: 'Street',        type: 'text' },
-                { field: 'postcode',    label: 'Postcode',      type: 'text' },
-                { field: 'country',     label: 'Country',       type: 'text' },
-                { field: 'email',       label: 'Email',         type: 'email' },
-                { field: 'phone',       label: 'Phone',         type: 'tel' },
-                { field: 'website',     label: 'Website',       type: 'url' },
-                { field: 'imageUrl',    label: 'Image URL',     type: 'url' },
+                { field: 'name',     label: 'Name *',    type: 'text' },
+                { field: 'city',     label: 'City *',    type: 'text' },
+                { field: 'street',   label: 'Street',    type: 'text' },
+                { field: 'postcode', label: 'Postcode',  type: 'text' },
+                { field: 'country',  label: 'Country',   type: 'text' },
+                { field: 'email',    label: 'Email',     type: 'email' },
+                { field: 'phone',    label: 'Phone',     type: 'tel' },
+                { field: 'website',  label: 'Website',   type: 'url' },
+                { field: 'imageUrl', label: 'Image URL', type: 'url' },
               ] as { field: keyof BusinessPayload; label: string; type: string }[]
             ).map(({ field, label, type }) => (
               <div key={field} className="flex flex-col gap-1">
@@ -218,24 +246,17 @@ function BusinessesTab() {
 
             {/* Category select */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-gray-600">Category *</label>
+              <label className="text-xs font-medium text-gray-600">Category</label>
               <select
                 value={form.categoryId}
                 onChange={(e) => updateField('categoryId', e.target.value)}
-                className={`rounded-lg border px-3 py-1.5 text-sm focus:outline-none focus:ring-1 ${
-                  formErrors.categoryId
-                    ? 'border-red-400 focus:border-red-500 focus:ring-red-400'
-                    : 'border-gray-300 focus:border-green-500 focus:ring-green-500'
-                }`}
+                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
               >
                 <option value="">Select a category…</option>
                 {(categories ?? []).map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
-              {formErrors.categoryId && (
-                <span className="text-xs text-red-500">{formErrors.categoryId}</span>
-              )}
             </div>
 
             {/* Description — full width */}
@@ -257,6 +278,8 @@ function BusinessesTab() {
             </div>
           </div>
 
+          {saveError && <p className="mt-3 text-xs text-red-500">{saveError}</p>}
+
           <div className="mt-4 flex items-center gap-2">
             <button
               onClick={() => (adding ? handleAdd() : handleUpdate(editingId!))}
@@ -275,6 +298,8 @@ function BusinessesTab() {
         </div>
       )}
 
+      {deleteError && <p className="mb-3 text-xs text-red-500">{deleteError}</p>}
+
       {/* Business list */}
       {list.length === 0 ? (
         <p className="text-sm text-gray-400">No businesses yet.</p>
@@ -284,7 +309,14 @@ function BusinessesTab() {
             <li key={biz.id} className="flex items-center justify-between py-3">
               <div>
                 <p className="text-sm font-medium text-gray-800">{biz.name}</p>
-                <p className="text-xs text-gray-500">{biz.city}</p>
+                <p className="text-xs text-gray-500">
+                  Location: {biz.city}
+                  {categoryMap[biz.categoryId] && (
+                    <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">
+                      {categoryMap[biz.categoryId]}
+                    </span>
+                  )}
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -292,6 +324,13 @@ function BusinessesTab() {
                   className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
                 >
                   Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(biz.id)}
+                  disabled={deletingId === biz.id}
+                  className="rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                >
+                  {deletingId === biz.id ? 'Deleting…' : 'Delete'}
                 </button>
               </div>
             </li>
