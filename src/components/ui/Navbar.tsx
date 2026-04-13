@@ -27,6 +27,7 @@ export const Navbar: React.FC = () => {
             {[
               { label: 'Home', to: '/' },
               { label: 'Directory', to: '/businesses' },
+              ...(user ? [{ label: 'Dashboard', to: '/dashboard' }] : []),
             ].map((link) => (
               <Link
                 key={link.label}
