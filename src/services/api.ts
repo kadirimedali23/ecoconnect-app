@@ -122,17 +122,16 @@ export async function deleteReview(id: string, businessId: string): Promise<{ me
 
 export type BusinessPayload = Omit<Business, 'id' | 'rating' | 'reviewCount' | 'featured' | 'createdAt'>;
 
-export async function createBusiness(payload: BusinessPayload): Promise<Business> {
-  return request<Business>('/businesses', {
+export async function putBusiness(
+  data: Omit<Business, 'id' | 'createdAt'>,
+  id?: string,
+  createdAt?: string,
+): Promise<{ message: string; id: string }> {
+  const resolvedId = id ?? crypto.randomUUID();
+  const resolvedCreatedAt = createdAt ?? new Date().toISOString();
+  return request<{ message: string; id: string }>('/businesses', {
     method: 'PUT',
-    body: JSON.stringify(payload),
-  });
-}
-
-export async function updateBusiness(id: string, payload: BusinessPayload): Promise<Business> {
-  return request<Business>(`/businesses/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...data, id: resolvedId, createdAt: resolvedCreatedAt }),
   });
 }
 

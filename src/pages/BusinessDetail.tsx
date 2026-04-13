@@ -218,13 +218,23 @@ export default function BusinessDetail() {
   return (
     <div className="min-h-screen bg-emerald-900">
       <Container className="py-8 max-w-4xl">
-        {/* Back link */}
-        <Link
-          to="/businesses"
-          className="mb-6 inline-flex items-center gap-1 text-sm text-emerald-300 hover:text-white transition-colors"
-        >
-          ← Back to Directory
-        </Link>
+        {/* Back link + Edit button row */}
+        <div className="mb-6 flex items-center justify-between">
+          <Link
+            to="/businesses"
+            className="inline-flex items-center gap-1 text-sm text-emerald-300 hover:text-white transition-colors"
+          >
+            ← Back to Directory
+          </Link>
+          {user && (
+            <Link
+              to={`/edit-business/${business.id}`}
+              className="rounded-lg bg-green-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-green-400 transition-colors"
+            >
+              Edit
+            </Link>
+          )}
+        </div>
 
         <div className="rounded-2xl overflow-hidden bg-white shadow-lg">
           {/* Hero image */}

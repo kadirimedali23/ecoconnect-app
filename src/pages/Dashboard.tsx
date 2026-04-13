@@ -7,8 +7,7 @@ import {
   putCategory,
   deleteCategory,
   getBusinesses,
-  createBusiness,
-  updateBusiness,
+  putBusiness,
   deleteBusiness,
   type Category,
   type Business,
@@ -146,8 +145,9 @@ function BusinessesTab() {
     setSaving(true);
     setSaveError('');
     try {
-      const created = await createBusiness(form);
-      setBusinesses([...list, created]);
+      const { id } = await putBusiness(form);
+      const newBusiness: Business = { ...form, id, createdAt: new Date().toISOString() };
+      setBusinesses([...list, newBusiness]);
       cancelForm();
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Failed to save. Please try again.');
@@ -162,8 +162,9 @@ function BusinessesTab() {
     setSaving(true);
     setSaveError('');
     try {
-      const updated = await updateBusiness(id, form);
-      setBusinesses(list.map((b) => (b.id === id ? updated : b)));
+      const existing = list.find((b) => b.id === id)!;
+      await putBusiness(form, id, existing.createdAt);
+      setBusinesses(list.map((b) => (b.id === id ? { ...existing, ...form } : b)));
       cancelForm();
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Failed to save. Please try again.');
