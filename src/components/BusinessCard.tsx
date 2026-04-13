@@ -24,9 +24,10 @@ function StarRating({ rating, reviewCount }: { rating: number | undefined; revie
 
 interface BusinessCardProps {
   business: Business;
+  categoryName?: string;
 }
 
-export default function BusinessCard({ business }: BusinessCardProps) {
+export default function BusinessCard({ business, categoryName }: BusinessCardProps) {
   const addressParts = [business.street, business.city, business.postcode, business.country].filter(Boolean);
 
   return (
@@ -49,9 +50,9 @@ export default function BusinessCard({ business }: BusinessCardProps) {
       {/* Card body */}
       <div className="flex flex-1 flex-col gap-2 p-4">
         {/* Category badge */}
-        {business.categoryId && (
+        {categoryName && (
           <span className="self-start rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-            {business.categoryId}
+            {categoryName}
           </span>
         )}
 

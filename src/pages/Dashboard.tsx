@@ -24,7 +24,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-emerald-900">
       <Container className="py-8 max-w-4xl">
         <h1 className="text-2xl font-bold text-white mb-6">
-          Welcome, {user?.username ?? 'there'}!
+          Welcome, {user?.email ?? 'there'}!
         </h1>
 
         {/* Tab menu */}

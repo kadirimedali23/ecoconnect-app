@@ -1,8 +1,9 @@
-import { signIn, signUp, signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
+import { signIn, signUp, signOut, getCurrentUser, fetchAuthSession, fetchUserAttributes } from 'aws-amplify/auth';
 
 export interface AuthUser {
   username: string;
   userId: string;
+  email: string;
 }
 
 export async function login(email: string, password: string): Promise<void> {
@@ -34,8 +35,8 @@ export async function getIdToken(): Promise<string | null> {
 
 export async function getCurrentAuthUser(): Promise<AuthUser | null> {
   try {
-    const user = await getCurrentUser();
-    return { username: user.username, userId: user.userId };
+    const [user, attributes] = await Promise.all([getCurrentUser(), fetchUserAttributes()]);
+    return { username: user.username, userId: user.userId, email: attributes.email ?? user.username };
   } catch {
     return null;
   }

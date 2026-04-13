@@ -186,7 +186,11 @@ export default function BusinessDirectory() {
         {loading
           ? Array.from({ length: 6 }, (_, i) => <SkeletonCard key={i} />)
           : sorted.map((business) => (
-              <BusinessCard key={business.id} business={business} />
+              <BusinessCard
+                key={business.id}
+                business={business}
+                categoryName={(categories ?? []).find((c) => c.id === business.categoryId)?.name}
+              />
             ))}
       </div>
 

@@ -4,10 +4,12 @@ import { useFetch } from '../hooks/useFetch';
 import { useAuth } from '../hooks/useAuth';
 import {
   getBusiness,
+  getCategories,
   getReviews,
   postReview,
   deleteReview,
   type Business,
+  type Category,
   type Review,
 } from '../services/api';
 import { Container } from '../components/ui/Layout';
@@ -178,6 +180,7 @@ export default function BusinessDetail() {
 
   const businessFetcher = useCallback(() => getBusiness(id!), [id]);
   const { data: business, loading, error } = useFetch<Business>(businessFetcher);
+  const { data: categories } = useFetch<Category[]>(getCategories);
 
   const [reviewTick, setReviewTick] = useState(0);
   const reviewsFetcher = useCallback(
@@ -257,7 +260,7 @@ export default function BusinessDetail() {
             <div className="space-y-2">
               {business.categoryId && (
                 <span className="inline-block rounded-full bg-green-100 px-3 py-0.5 text-xs font-medium text-green-800">
-                  {business.categoryId}
+                  {(categories ?? []).find((c) => c.id === business.categoryId)?.name ?? business.categoryId}
                 </span>
               )}
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{business.name}</h1>
