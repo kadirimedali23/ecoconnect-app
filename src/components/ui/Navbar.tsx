@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Container } from './Layout';
 import { Button } from './Button';
 import { useAuth } from '../../hooks/useAuth';
+import Logo from '/workspaces/ecoconnect-app/src/assets/logo2.png';
 
 export const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -18,8 +19,9 @@ export const Navbar: React.FC = () => {
       <Container>
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-black text-emerald-700 tracking-tighter no-underline" style={{ textDecoration: 'none' }}>
-            🌱 Eco<span className="text-slate-900">Connect</span>
+          <Link to="/" className="flex items-center text-2xl font-black text-emerald-700 tracking-tighter no-underline" style={{ textDecoration: 'none' }}>
+
+          <img src={Logo} alt="logo" className="w-12 h-auto gap-3" />Eco<span className="text-slate-900">Connect</span>
           </Link>
 
           {/* Nav Links */}

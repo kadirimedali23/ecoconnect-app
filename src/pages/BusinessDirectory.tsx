@@ -107,7 +107,7 @@ export default function BusinessDirectory() {
           placeholder="Search businesses..."
           value={inputQ}
           onChange={(e) => setInputQ(e.target.value)}
-          className="flex-1 min-w-48 rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+          className="flex-1 min-w-48 rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 placeholder:text-gray-300 text-gray-100"
           aria-label="Search businesses"
         />
 
@@ -117,7 +117,7 @@ export default function BusinessDirectory() {
           placeholder="Filter by city..."
           value={city}
           onChange={(e) => setCity(e.target.value)}
-          className="flex-1 min-w-36 rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+          className="placeholder:text-gray-300 text-gray-100 flex-1 min-w-36 rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
           aria-label="Filter by city"
         />
 
