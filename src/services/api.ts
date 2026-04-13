@@ -86,17 +86,14 @@ export async function getCategories(): Promise<Category[]> {
   return request<Category[]>('/categories');
 }
 
-export async function createCategory(name: string): Promise<Category> {
-  return request<Category>('/categories', {
-    method: 'POST',
-    body: JSON.stringify({ name }),
-  });
-}
-
-export async function updateCategory(id: string, name: string): Promise<Category> {
-  return request<Category>(`/categories/${id}`, {
+export async function putCategory(
+  name: string,
+  id?: string,
+): Promise<{ message: string; id: string }> {
+  const resolvedId = id ?? crypto.randomUUID();
+  return request<{ message: string; id: string }>('/categories', {
     method: 'PUT',
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ id: resolvedId, name }),
   });
 }
 
@@ -121,4 +118,20 @@ export async function postReview(payload: {
 
 export async function deleteReview(id: string, businessId: string): Promise<{ message: string }> {
   return request<{ message: string }>(`/reviews/${id}?businessId=${businessId}`, { method: 'DELETE' });
+}
+
+export type BusinessPayload = Omit<Business, 'id' | 'rating' | 'reviewCount' | 'featured' | 'createdAt'>;
+
+export async function createBusiness(payload: BusinessPayload): Promise<Business> {
+  return request<Business>('/businesses', {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateBusiness(id: string, payload: BusinessPayload): Promise<Business> {
+  return request<Business>(`/businesses/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
 }
