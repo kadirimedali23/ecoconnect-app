@@ -100,3 +100,7 @@ export async function postReview(payload: {
     body: JSON.stringify(payload),
   });
 }
+
+export async function deleteReview(id: string, businessId: string): Promise<{ message: string }> {
+  return request<{ message: string }>(`/reviews/${id}?businessId=${businessId}`, { method: 'DELETE' });
+}

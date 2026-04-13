@@ -6,6 +6,7 @@ import {
   getBusiness,
   getReviews,
   postReview,
+  deleteReview,
   type Business,
   type Review,
 } from '../services/api';
@@ -37,19 +38,61 @@ function InfoRow({ icon, children }: { icon: string; children: React.ReactNode }
 
 // ── Review card ───────────────────────────────────────────────────────────────
 
-function ReviewCard({ review }: { review: Review }) {
+function ReviewCard({
+  review,
+  currentUserId,
+  onDeleted,
+}: {
+  review: Review;
+  currentUserId?: string;
+  onDeleted: (id: string) => void;
+}) {
   const date = new Date(review.createdAt).toLocaleDateString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric',
   });
+
+  const [deleting, setDeleting]       = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const isOwner = !!currentUserId && currentUserId === review.userId;
+
+  async function handleDelete() {
+    if (!window.confirm('Are you sure you want to delete this review?')) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteReview(review.id, review.businessId);
+      onDeleted(review.id);
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete review.');
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
       <div className="flex items-center justify-between gap-2">
         <span className="font-medium text-gray-800">{review.username}</span>
-        <span className="text-xs text-gray-400">{date}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-gray-400">{date}</span>
+          {isOwner && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="text-sm text-red-500 hover:text-red-700 disabled:opacity-50 transition-colors"
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </button>
+          )}
+        </div>
       </div>
       <StarRating rating={review.rating} size="sm" />
       {review.comment && (
         <p className="mt-2 text-sm text-gray-600">{review.comment}</p>
+      )}
+      {deleteError && (
+        <p className="mt-2 text-xs text-red-600">{deleteError}</p>
       )}
     </div>
   );
@@ -143,6 +186,13 @@ export default function BusinessDetail() {
     [id, reviewTick],
   );
   const { data: reviews, loading: revLoading } = useFetch<Review[]>(reviewsFetcher);
+
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+  const visibleReviews = reviews?.filter((r) => !deletedIds.has(r.id));
+
+  function handleDeleted(reviewId: string) {
+    setDeletedIds((prev) => new Set(prev).add(reviewId));
+  }
 
   if (loading) {
     return (
@@ -259,20 +309,27 @@ export default function BusinessDetail() {
               )}
             </div>
 
-            {/* Reviews — list always visible; form only when logged in */}
+            {/* Reviews — list always visible, this form only when logged in */}
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-gray-900">
                 Reviews{' '}
-                {reviews && reviews.length > 0 && (
-                  <span className="text-gray-400 font-normal text-sm">({reviews.length})</span>
+                {visibleReviews && visibleReviews.length > 0 && (
+                  <span className="text-gray-400 font-normal text-sm">({visibleReviews.length})</span>
                 )}
               </h2>
 
               {revLoading ? (
                 <p className="text-sm text-gray-400 animate-pulse">Loading reviews…</p>
-              ) : reviews && reviews.length > 0 ? (
+              ) : visibleReviews && visibleReviews.length > 0 ? (
                 <div className="space-y-3">
-                  {reviews.map((r) => <ReviewCard key={r.id} review={r} />)}
+                  {visibleReviews.map((r) => (
+                    <ReviewCard
+                      key={r.id}
+                      review={r}
+                      currentUserId={user?.userId}
+                      onDeleted={handleDeleted}
+                    />
+                  ))}
                 </div>
               ) : (
                 <p className="text-sm text-gray-400">No reviews yet. Be the first!</p>
