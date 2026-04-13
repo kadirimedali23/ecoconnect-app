@@ -86,6 +86,24 @@ export async function getCategories(): Promise<Category[]> {
   return request<Category[]>('/categories');
 }
 
+export async function createCategory(name: string): Promise<Category> {
+  return request<Category>('/categories', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  });
+}
+
+export async function updateCategory(id: string, name: string): Promise<Category> {
+  return request<Category>(`/categories/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ name }),
+  });
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+  return request<void>(`/categories/${id}`, { method: 'DELETE' });
+}
+
 export async function getReviews(businessId: string): Promise<Review[]> {
   return request<Review[]>(`/businesses/${businessId}/reviews`);
 }
