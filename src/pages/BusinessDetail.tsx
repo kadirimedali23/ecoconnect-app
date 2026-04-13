@@ -221,22 +221,14 @@ export default function BusinessDetail() {
   return (
     <div className="min-h-screen bg-emerald-900">
       <Container className="py-8 max-w-4xl">
-        {/* Back link + Edit button row */}
-        <div className="mb-6 flex items-center justify-between">
+        {/* Back link */}
+        <div className="mb-6">
           <Link
             to="/businesses"
             className="inline-flex items-center gap-1 text-sm text-emerald-300 hover:text-white transition-colors"
           >
             ← Back to Directory
           </Link>
-          {user && (
-            <Link
-              to={`/edit-business/${business.id}`}
-              className="rounded-lg bg-green-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-green-400 transition-colors"
-            >
-              Edit
-            </Link>
-          )}
         </div>
 
         <div className="rounded-2xl overflow-hidden bg-white shadow-lg">
@@ -265,11 +257,11 @@ export default function BusinessDetail() {
               )}
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{business.name}</h1>
 
-              {business.rating !== undefined && (
+              {business.rating != null && (
                 <div className="flex items-center gap-2">
                   <StarRating rating={business.rating} size="lg" />
                   <span className="text-gray-700 font-medium">{business.rating.toFixed(1)}</span>
-                  {business.reviewCount !== undefined && (
+                  {business.reviewCount != null && (
                     <span className="text-sm text-gray-400">
                       ({business.reviewCount} review{business.reviewCount !== 1 ? 's' : ''})
                     </span>

@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useFetch } from "../hooks/useFetch.ts";
 import { getBusinesses, getCategories, type Business, type Category } from "../services/api";
 import BusinessCard from "../components/BusinessCard";
 import { Container } from "../components/ui/Layout";
-import { useAuth } from "../hooks/useAuth";
 
 type SortKey = "name-asc" | "name-desc" | "rating-desc" | "newest";
 
@@ -25,7 +24,6 @@ function SkeletonCard() {
 }
 
 export default function BusinessDirectory() {
-  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [inputQ, setInputQ]       = useState(() => searchParams.get("q") ?? "");
@@ -94,21 +92,11 @@ export default function BusinessDirectory() {
   return (
     <div className="min-h-screen bg-emerald-900">
     <Container className="py-8 max-w-6xl">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Business Directory</h1>
-          <p className="mt-1 text-emerald-200">
-            Discover eco-friendly businesses across Coventry and Warwickshire.
-          </p>
-        </div>
-        {user && (
-          <Link
-            to="/add-business"
-            className="shrink-0 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-400 transition-colors"
-          >
-            + Add Business
-          </Link>
-        )}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-white">Business Directory</h1>
+        <p className="mt-1 text-emerald-200">
+          Discover eco-friendly businesses across Coventry and Warwickshire.
+        </p>
       </div>
 
       {/* Filters */}
