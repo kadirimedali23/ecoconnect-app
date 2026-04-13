@@ -312,6 +312,8 @@ function CategoriesTab() {
   const [newName, setNewName] = useState('');
   const [addError, setAddError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState('');
 
   const list = categories ?? data ?? [];
 
@@ -347,8 +349,17 @@ function CategoriesTab() {
   }
 
   async function handleDelete(id: string) {
-    await deleteCategory(id);
-    setCategories(list.filter((c) => c.id !== id));
+    if (!confirm('Are you sure you want to delete this category?')) return;
+    setDeletingId(id);
+    setDeleteError('');
+    try {
+      await deleteCategory(id);
+      setCategories(list.filter((c) => c.id !== id));
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : 'Failed to delete. Please try again.');
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   if (loading) return <p className="text-sm text-gray-500">Loading categories…</p>;
@@ -402,6 +413,10 @@ function CategoriesTab() {
         </div>
       )}
 
+      {deleteError && (
+        <p className="mb-3 text-xs text-red-500">{deleteError}</p>
+      )}
+
       {/* Category list */}
       {list.length === 0 ? (
         <p className="text-sm text-gray-400">No categories yet.</p>
@@ -452,9 +467,10 @@ function CategoriesTab() {
                     </button>
                     <button
                       onClick={() => handleDelete(cat.id)}
-                      className="rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      disabled={deletingId === cat.id}
+                      className="rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
                     >
-                      Delete
+                      {deletingId === cat.id ? 'Deleting…' : 'Delete'}
                     </button>
                   </div>
                 </div>

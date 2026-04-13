@@ -97,8 +97,8 @@ export async function putCategory(
   });
 }
 
-export async function deleteCategory(id: string): Promise<void> {
-  return request<void>(`/categories/${id}`, { method: 'DELETE' });
+export async function deleteCategory(id: string): Promise<{ message: string }> {
+  return request<{ message: string }>(`/categories/${id}`, { method: 'DELETE' });
 }
 
 export async function getReviews(businessId: string): Promise<Review[]> {
