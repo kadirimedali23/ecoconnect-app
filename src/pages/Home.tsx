@@ -3,6 +3,7 @@ import { Container, Section } from "../components/ui/Layout";
 import { Heading, Text } from "../components/ui/Typography";
 import { Button } from "../components/ui/Button";
 
+{/* Oh the Hero, the entry point linking visitors to the directory and registration. */}
 export default function Home() {
   return (
     <>
@@ -51,6 +52,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
+      {/* Feature cards rendered from an array to keep the JSX concise. */}
       <Section bg="bg-white">
         <Container>
           <div className="text-center mb-16">

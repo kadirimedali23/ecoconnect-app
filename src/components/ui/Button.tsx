@@ -14,6 +14,9 @@ export const Button: React.FC<ButtonProps> = ({
   children, 
   onClick, 
   className = "" 
+
+  // This bit of code maps each variant to Tailwind classes and its used across Navbar, Login, Register, and Dashboard. (Dan Code)
+
 }) => {
   const variants: Record<ButtonVariant, string> = {
     success: "bg-emerald-500 hover:bg-emerald-600 [box-shadow:0_6px_0_#064e3b] hover:[box-shadow:0_8px_0_#064e3b] active:[box-shadow:0_2px_0_#064e3b] active:translate-y-1 ring-emerald-500/20",

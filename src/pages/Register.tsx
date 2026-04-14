@@ -19,6 +19,7 @@ export default function Register() {
     setError('');
     setLoading(true);
 
+    // Client-side password match check before hitting Cognito, this avoids a wasted network call.
     if (password !== repeatPassword) {
       setError('Passwords do not match');
       setLoading(false);

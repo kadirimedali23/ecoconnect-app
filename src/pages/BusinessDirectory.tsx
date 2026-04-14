@@ -7,6 +7,8 @@ import { Container } from "../components/ui/Layout";
 
 type SortKey = "name-asc" | "name-desc" | "rating-desc" | "newest";
 
+// A placeholder shown while the API loads it prevents the layout from shifting on the grid.
+
 function SkeletonCard() {
   return (
     <div className="flex flex-col rounded-2xl border border-gray-200 bg-white overflow-hidden animate-pulse">
@@ -26,10 +28,14 @@ function SkeletonCard() {
 export default function BusinessDirectory() {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // It is initialised from URL params so shared/bookmarked filtered links restore correctly.
+
   const [inputQ, setInputQ]       = useState(() => searchParams.get("q") ?? "");
   const [city, setCity]           = useState(() => searchParams.get("city") ?? "");
   const [categoryId, setCategoryId] = useState(() => searchParams.get("category") ?? "all");
   const [sort, setSort]           = useState<SortKey>("name-asc");
+
+  // This debounces input by 400ms so filtering doesn't fire on every keystroke which could disturb the user.
 
   const [debouncedQ, setDebouncedQ]       = useState(inputQ);
   const [debouncedCity, setDebouncedCity] = useState(city);
@@ -43,6 +49,8 @@ export default function BusinessDirectory() {
     const t = setTimeout(() => setDebouncedCity(city), 400);
     return () => clearTimeout(t);
   }, [city]);
+
+  // This keeps URL query params in sync with active filters for shareability reasons.
 
   useEffect(() => {
     setSearchParams(
@@ -76,6 +84,8 @@ export default function BusinessDirectory() {
       return true;
     });
   }, [businesses, debouncedQ, debouncedCity, categoryId]);
+
+  // useMemo avoids re-filtering on every render so it only recalculates when filters change.
 
   const sorted = useMemo<Business[]>(() => {
     return filtered.slice().sort((a, b) => {

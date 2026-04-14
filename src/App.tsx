@@ -13,6 +13,8 @@ import Dashboard from './pages/Dashboard.tsx';
 import AddBusinessPage from './pages/AddBusinessPage.tsx';
 import EditBusinessPage from './pages/EditBusinessPage.tsx';
 
+// Here it redirects unauthenticated users to /login, this is also used to wrap protected routes below.
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <p>Loading…</p>;
@@ -22,6 +24,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <BrowserRouter>
+        
+        {/* AuthProvider wraps everything so every page can access user state via useAuth(). */}
+    
     <AuthProvider>
       <Navbar />
       <main className="flex-1">
@@ -31,6 +36,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/businesses" element={<BusinessDirectory />} />
           <Route path="/businesses/:id" element={<BusinessDetail />} />
+          {/* Dashboard, add, and edit require login then ProtectedRoute handles the redirect. */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/add-business" element={<ProtectedRoute><AddBusinessPage /></ProtectedRoute>} />
           <Route path="/edit-business/:id" element={<ProtectedRoute><EditBusinessPage /></ProtectedRoute>} />

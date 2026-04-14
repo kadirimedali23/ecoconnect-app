@@ -39,6 +39,8 @@ export class ApiError extends Error {
   }
 }
 
+// Here is the central request handler, it attaches the Cognito JWT automatically so no individual function needs to handle auth.
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const idToken = await getIdToken();
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -64,7 +66,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     throw new ApiError(res.status, message);
   }
 
-  if (res.status === 204) return undefined as T;
+  if (res.status === 204) return undefined as T; // 204 means success with no body, so it will skip JSON parsing.
 
   return res.json() as Promise<T>;
 }
@@ -86,6 +88,7 @@ export async function getCategories(): Promise<Category[]> {
   return request<Category[]>('/categories');
 }
 
+// This function handles both create and update so it generates a new UUID when no id is provided.
 export async function putCategory(
   name: string,
   id?: string,

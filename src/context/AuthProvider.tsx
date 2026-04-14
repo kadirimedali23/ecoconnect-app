@@ -1,4 +1,5 @@
-import { useEffect, useState, ReactNode } from 'react';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { getCurrentAuthUser, logout, type AuthUser } from '../services/authService';
 import { AuthContext } from './AuthContext';
 
@@ -11,15 +12,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u);
   };
 
+   // This useEffect restores an existing Cognito session on page load so users don't get forced to re-login.
+
   useEffect(() => {
     refresh().finally(() => setLoading(false));
   }, []);
+
+    // This lears user state after sign out, causing ProtectedRoutes to redirect immediately.
 
   const signOut = async () => {
     await logout();
     setUser(null);
   };
-
+  
   return (
     <AuthContext.Provider value={{ user, loading, signOut, refresh }}>
       {children}

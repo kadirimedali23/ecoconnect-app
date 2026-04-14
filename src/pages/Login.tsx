@@ -19,7 +19,9 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    try {
+    try {  
+      // After login, refresh() re-syncs AuthProvider so the Navbar and ProtectedRoutes update immediately.
+      
       await login(email, password);
       await refresh();
       navigate('/businesses');

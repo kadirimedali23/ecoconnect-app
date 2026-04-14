@@ -1,4 +1,5 @@
-import { useState, KeyboardEvent } from 'react';
+import { useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { putBusiness, getCategories, type Category } from '../services/api';
 import { useFetch } from '../hooks/useFetch';
@@ -22,6 +23,8 @@ const EMPTY_FORM = {
   reviewCount: undefined as number | undefined,
 };
 
+// This is only reachable by logged-in users via <ProtectedRoute> in App.tsx.
+
 export default function AddBusinessPage() {
   const navigate = useNavigate();
   const { data: categories } = useFetch<Category[]>(getCategories);
@@ -32,6 +35,8 @@ export default function AddBusinessPage() {
   const [apiError, setApiError] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Its a single handler for all input types (text, select, and checkbox, you name it).
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value, type } = e.target;
     setForm((prev) => ({
@@ -39,6 +44,8 @@ export default function AddBusinessPage() {
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   }
+
+  // This one adds tag on Enter, ignoring duplicates, its rendered as removable pills in the UI.
 
   function handleTagKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
@@ -64,6 +71,8 @@ export default function AddBusinessPage() {
       setNameError('Business name is required.');
       return;
     }
+
+    // putBusiness with no id generates a UUID, creating a new listing.
 
     setSaving(true);
     try {

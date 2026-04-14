@@ -23,6 +23,7 @@ export async function register(email: string, password: string): Promise<void> {
 export async function logout(): Promise<void> {
   await signOut();
 }
+// Here it retrieves the Cognito JWT which is attached to every API request in api.ts for backend auth.
 
 export async function getIdToken(): Promise<string | null> {
   try {
@@ -32,6 +33,8 @@ export async function getIdToken(): Promise<string | null> {
     return null;
   }
 }
+
+// This fetches user identity and attributes in parallel, merged into the AuthUser shape.
 
 export async function getCurrentAuthUser(): Promise<AuthUser | null> {
   try {

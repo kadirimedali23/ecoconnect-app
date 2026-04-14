@@ -14,7 +14,7 @@ export function useFetch<T>(fetcher: () => Promise<T>): FetchState<T> {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled = false; // Prevents stale responses from updating state after unmount.
 
     setLoading(true);
     setError(null);
@@ -42,7 +42,7 @@ export function useFetch<T>(fetcher: () => Promise<T>): FetchState<T> {
     };
   }, [fetcher, tick]);
 
-  const refetch = () => setTick((t) => t + 1);
+  const refetch = () => setTick((t) => t + 1); // And this bumps tick to re-trigger the effect.
 
   return { data, loading, error, refetch };
 }

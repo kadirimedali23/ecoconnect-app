@@ -27,6 +27,8 @@ interface BusinessCardProps {
   categoryName?: string;
 }
 
+// This filters out empty address fields so no stray commas appear in the listing.
+
 export default function BusinessCard({ business, categoryName }: BusinessCardProps) {
   const addressParts = [business.street, business.city, business.postcode, business.country].filter(Boolean);
 
@@ -83,7 +85,8 @@ export default function BusinessCard({ business, categoryName }: BusinessCardPro
           </div>
         )}
 
-        {/* Star rating */}
+        {/* Star rating ( Up to the rounded rating value its amber then grey beyond it.) */}
+        
         <StarRating rating={business.rating} reviewCount={business.reviewCount} />
 
         {/* CTA */}

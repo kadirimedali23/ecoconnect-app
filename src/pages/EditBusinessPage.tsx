@@ -1,12 +1,17 @@
-import { useState, useEffect, useCallback, KeyboardEvent } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import type { KeyboardEvent } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { getBusiness, putBusiness, getCategories, type Business, type Category } from '../services/api';
 import { useFetch } from '../hooks/useFetch';
 import { Container } from '../components/ui/Layout';
 
+// This is only reachable by logged-in users via <ProtectedRoute> in App.tsx.
+
 export default function EditBusinessPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  // useCallback stabilises the fetcher so useFetch doesn't loop on re-renders.
 
   const businessFetcher = useCallback(() => getBusiness(id!), [id]);
   const { data: business, loading, error } = useFetch<Business>(businessFetcher);
@@ -33,6 +38,8 @@ export default function EditBusinessPage() {
   const [nameError, setNameError] = useState('');
   const [apiError, setApiError] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // This one populates the form once business data arrives from the API.
 
   useEffect(() => {
     if (!business) return;
@@ -87,6 +94,8 @@ export default function EditBusinessPage() {
       setNameError('Business name is required.');
       return;
     }
+
+    // This passes original id and createdAt so the API updates the record rather than creating one.
 
     setSaving(true);
     try {

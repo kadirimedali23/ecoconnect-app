@@ -16,6 +16,8 @@ import {
 
 type Tab = 'categories' | 'businesses';
 
+// This controls which tab panel is visible, either categories or businesses.
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('categories');
@@ -71,6 +73,8 @@ const EMPTY_FORM: BusinessPayload = {
 
 const REQUIRED_FIELDS: (keyof BusinessPayload)[] = ['name', 'description', 'city'];
 
+// Validates required fields before an API call, it only returns field-level error messages.
+
 function validateBusiness(form: BusinessPayload): Partial<Record<keyof BusinessPayload, string>> {
   const errors: Partial<Record<keyof BusinessPayload, string>> = {};
   for (const field of REQUIRED_FIELDS) {
@@ -95,6 +99,8 @@ function BusinessesTab() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState('');
 
+  // The local state takes over from useFetch once a change is made, for instant UI updates.
+
   const list = businesses ?? data ?? [];
   const categoryMap = Object.fromEntries((categories ?? []).map((c) => [c.id, c.name]));
 
@@ -110,6 +116,8 @@ function BusinessesTab() {
     setEditingId(null);
     setAdding(true);
   }
+
+  // The function below pre-populates the form with existing data when the user clicks Edit.
 
   function openEdit(business: Business) {
     setForm({
@@ -161,6 +169,9 @@ function BusinessesTab() {
     if (Object.keys(errors).length > 0) { setFormErrors(errors); return; }
     setSaving(true);
     setSaveError('');
+
+    // This part preserves original createdAt on update so the timestamp doesn't reset.
+
     try {
       const existing = list.find((b) => b.id === id)!;
       await putBusiness(form, id, existing.createdAt);
@@ -280,6 +291,8 @@ function BusinessesTab() {
           </div>
 
           {saveError && <p className="mt-3 text-xs text-red-500">{saveError}</p>}
+
+          {/* The same Save button handles add and update depending on whether editingId is set. */}
 
           <div className="mt-4 flex items-center gap-2">
             <button

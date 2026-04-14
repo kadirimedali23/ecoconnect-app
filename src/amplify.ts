@@ -1,5 +1,8 @@
 import { Amplify } from 'aws-amplify';
 
+// This connects the app to the correct Cognito user pool before anything else runs.
+
+
 Amplify.configure({
   Auth: {
     Cognito: {

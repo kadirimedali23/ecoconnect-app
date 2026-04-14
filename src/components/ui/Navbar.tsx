@@ -9,6 +9,8 @@ export const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
+  // Signs out and navigates away so the user doesn't stay on a protected page.
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
@@ -29,6 +31,9 @@ export const Navbar: React.FC = () => {
             {[
               { label: 'Home', to: '/' },
               { label: 'Directory', to: '/businesses' },
+
+              // The dashboard link only appears when a user is logged in.
+
               ...(user ? [{ label: 'Dashboard', to: '/dashboard' }] : []),
             ].map((link) => (
               <Link
@@ -43,6 +48,8 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* CTA Group */}
+          {/* Shows Logout when authenticated, Sign In / Register when not.*/}
+
           <div className="flex items-center gap-6">
             {user ? (
               <Button
