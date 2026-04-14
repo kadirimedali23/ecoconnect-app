@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Container } from './Layout';
 import { Button } from './Button';
 import { useAuth } from '../../hooks/useAuth';
-import Logo from '/workspaces/ecoconnect-app/src/assets/logo2.png';
+import Logo from '../../assets/logo2.png';
 
 export const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
