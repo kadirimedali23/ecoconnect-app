@@ -25,7 +25,7 @@ export default function Home() {
               Businesses Near You
             </Heading>
 
-            <Text className="text-xl mb-10 text-emerald-100 max-w-2xl mx-auto">
+            <Text className="text-xl mb-10 text-white max-w-2xl mx-auto">
               EcoConnect brings together zero-waste shops, repair cafés, local
               food producers, and eco-services across Coventry and Warwickshire.
             </Text>
